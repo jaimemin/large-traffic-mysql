@@ -1,4 +1,4 @@
-package com.tistory.jaimemin.controller;
+package com.tistory.jaimemin.application.controller;
 
 import com.tistory.jaimemin.domain.member.dto.MemberDto;
 import com.tistory.jaimemin.domain.member.dto.MemberNicknameHistoryDto;
