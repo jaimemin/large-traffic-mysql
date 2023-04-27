@@ -6,6 +6,8 @@ import com.tistory.jaimemin.domain.post.dto.PostCommand;
 import com.tistory.jaimemin.domain.post.entity.Post;
 import com.tistory.jaimemin.domain.post.service.PostReadService;
 import com.tistory.jaimemin.domain.post.service.PostWriteService;
+import com.tistory.jaimemin.util.CursorRequest;
+import com.tistory.jaimemin.util.CursorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,5 +41,13 @@ public class PostController {
             Pageable pageable
     ) {
         return postReadService.getPosts(memberId, pageable);
+    }
+
+    @GetMapping("/members/{memberId}/by-cursor")
+    public CursorResponse<Post> getPosts(
+            @PathVariable Long memberId,
+            CursorRequest cursorRequest
+    ) {
+        return postReadService.getPosts(memberId, cursorRequest);
     }
 }

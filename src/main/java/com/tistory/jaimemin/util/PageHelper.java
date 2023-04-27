@@ -1,4 +1,4 @@
-package com.tistory.jaimemin.domain;
+package com.tistory.jaimemin.util;
 
 import org.springframework.data.domain.Sort;
 
