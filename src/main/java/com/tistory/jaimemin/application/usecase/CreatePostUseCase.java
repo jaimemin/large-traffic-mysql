@@ -7,6 +7,7 @@ import com.tistory.jaimemin.domain.post.service.PostWriteService;
 import com.tistory.jaimemin.domain.post.service.TimelineWriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,13 @@ public class CreatePostUseCase {
 
     private final TimelineWriteService timelineWriteService;
 
+    /**
+     * 서비스 성격에 따라 해당 메서드에 Transactional 적용할지 여부가 갈림
+     *
+     * @param postCommand
+     * @return
+     */
+    // @Transactional
     public Long execute(PostCommand postCommand) {
         var postId = postWriteService.create(postCommand);
         var followMemberIds = followReadService.getFollowers(postCommand.memberId())

@@ -8,6 +8,7 @@ import com.tistory.jaimemin.domain.member.repository.MemberNicknameHistoryReposi
 import com.tistory.jaimemin.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class MemberWriteService {
      *
      * 닉네임은 10자 넘길 수 없음
      */
+    @Transactional
     public MemberDto register(RegisterMemberCommand command) {
         Member member = Member.builder()
                 .nickname(command.nickname())
@@ -34,6 +36,7 @@ public class MemberWriteService {
         return toDto(savedMember);
     }
 
+    @Transactional
     public void changeNickname(Long memberId, String nickname) {
         var member = memberRepository.findById(memberId).orElseThrow();
         member.changeNickname(nickname);
