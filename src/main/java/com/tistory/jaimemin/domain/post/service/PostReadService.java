@@ -34,11 +34,28 @@ public class PostReadService {
         var posts = cursorRequest.hasKey() ?
                 postRepository.findAllByLessThanIdAndMemberIdAndOrderByIdDesc(cursorRequest.key(), memberId, cursorRequest.size())
                 : postRepository.findAllByMemberIdAndOrderByIdDesc(memberId, cursorRequest.size());
-        var nextKey = posts.stream()
+        var nextKey = getNextKey(posts);
+
+        return new CursorResponse<>(cursorRequest.next(nextKey), posts);
+    }
+
+    public CursorResponse<Post> getPosts(List<Long> memberIds, CursorRequest cursorRequest) {
+        var posts = cursorRequest.hasKey() ?
+                postRepository.findAllByLessThanIdAndInMemberIdsAndOrderByIdDesc(cursorRequest.key(), memberIds, cursorRequest.size())
+                : postRepository.findAllByInMemberIdsAndOrderByIdDesc(memberIds, cursorRequest.size());
+        var nextKey = getNextKey(posts);
+
+        return new CursorResponse<>(cursorRequest.next(nextKey), posts);
+    }
+
+    public List<Post> getPosts(List<Long> ids) {
+        return postRepository.findAllByInIds(ids);
+    }
+
+    private static long getNextKey(List<Post> posts) {
+        return posts.stream()
                 .mapToLong(Post::getId)
                 .min()
                 .orElse(CursorRequest.NONE_KEY);
-
-        return new CursorResponse<>(cursorRequest.next(nextKey), posts);
     }
 }

@@ -1,5 +1,7 @@
 package com.tistory.jaimemin.application.controller;
 
+import com.tistory.jaimemin.application.usecase.CreatePostUseCase;
+import com.tistory.jaimemin.application.usecase.GetTimelinePostUseCase;
 import com.tistory.jaimemin.domain.post.dto.DailyPostCount;
 import com.tistory.jaimemin.domain.post.dto.DailyPostCountRequest;
 import com.tistory.jaimemin.domain.post.dto.PostCommand;
@@ -10,7 +12,6 @@ import com.tistory.jaimemin.util.CursorRequest;
 import com.tistory.jaimemin.util.CursorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +26,13 @@ public class PostController {
 
     private final PostWriteService postWriteService;
 
+    private final CreatePostUseCase createPostUseCase;
+
+    private final GetTimelinePostUseCase getTimelinePostUsecase;
+
     @PostMapping
     public Long create(PostCommand command) {
-        return postWriteService.create(command);
+        return createPostUseCase.execute(command);
     }
 
     @GetMapping("/daily-post-counts")
@@ -49,5 +54,13 @@ public class PostController {
             CursorRequest cursorRequest
     ) {
         return postReadService.getPosts(memberId, cursorRequest);
+    }
+
+    @GetMapping("/member/{memberId}/timeline")
+    public CursorResponse<Post> getTimeline(
+            @PathVariable Long memberId,
+            CursorRequest cursorRequest
+    ) {
+        return getTimelinePostUsecase.executeByTimeline(memberId, cursorRequest);
     }
 }
