@@ -1,7 +1,9 @@
 package com.tistory.jaimemin.application.controller;
 
+import com.tistory.jaimemin.application.usecase.CreatePostLikeUseCase;
 import com.tistory.jaimemin.application.usecase.CreatePostUseCase;
 import com.tistory.jaimemin.application.usecase.GetTimelinePostUseCase;
+import com.tistory.jaimemin.domain.post.dto.PostDto;
 import com.tistory.jaimemin.domain.post.dto.DailyPostCount;
 import com.tistory.jaimemin.domain.post.dto.DailyPostCountRequest;
 import com.tistory.jaimemin.domain.post.dto.PostCommand;
@@ -28,6 +30,8 @@ public class PostController {
 
     private final CreatePostUseCase createPostUseCase;
 
+    private final CreatePostLikeUseCase createPostLikeUseCase;
+
     private final GetTimelinePostUseCase getTimelinePostUsecase;
 
     @PostMapping
@@ -41,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping("/members/{memberId}")
-    public Page<Post> getPosts(
+    public Page<PostDto> getPosts(
             @PathVariable Long memberId,
             Pageable pageable
     ) {
@@ -64,10 +68,14 @@ public class PostController {
         return getTimelinePostUsecase.executeByTimeline(memberId, cursorRequest);
     }
 
-    @PostMapping("/{postId}/like")
-    public void likePost(@PathVariable Long postId) {
+    @PostMapping("/{postId}/like/v1")
+    public void likePostV1(@PathVariable Long postId) {
 //        postWriteService.likePost(postId);
         postWriteService.likePostByOptimisticLock(postId);
     }
 
+    @PostMapping("/{postId}/like/v2")
+    public void likePostV2(@PathVariable Long postId, @RequestParam Long memberId) {
+        createPostLikeUseCase.execute(postId, memberId);
+    }
 }

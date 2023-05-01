@@ -2,7 +2,9 @@ package com.tistory.jaimemin.domain.post.service;
 
 import com.tistory.jaimemin.domain.post.dto.DailyPostCount;
 import com.tistory.jaimemin.domain.post.dto.DailyPostCountRequest;
+import com.tistory.jaimemin.domain.post.dto.PostDto;
 import com.tistory.jaimemin.domain.post.entity.Post;
+import com.tistory.jaimemin.domain.post.repository.PostLikeRepository;
 import com.tistory.jaimemin.domain.post.repository.PostRepository;
 import com.tistory.jaimemin.util.CursorRequest;
 import com.tistory.jaimemin.util.CursorResponse;
@@ -22,12 +24,18 @@ public class PostReadService {
 
     private final PostRepository postRepository;
 
+    private final PostLikeRepository postLikeRepository;
+
     public List<DailyPostCount> getDailyPostCount(DailyPostCountRequest request) {
         return postRepository.groupByCreatedDate(request);
     }
 
-    public Page<Post> getPosts(Long memberId, Pageable pageable) {
-        return postRepository.findAllByMemberId(memberId, pageable);
+    public Post getPost(Long postId) {
+        return postRepository.findById(postId, false).orElseThrow();
+    }
+
+    public Page<PostDto> getPosts(Long memberId, Pageable pageable) {
+        return postRepository.findAllByMemberId(memberId, pageable).map(this::toDto);
     }
 
     public CursorResponse<Post> getPosts(Long memberId, CursorRequest cursorRequest) {
@@ -57,5 +65,13 @@ public class PostReadService {
                 .mapToLong(Post::getId)
                 .min()
                 .orElse(CursorRequest.NONE_KEY);
+    }
+
+    private PostDto toDto(Post post) {
+        return new PostDto(
+                post.getId(),
+                post.getContents(),
+                post.getCreatedAt(),
+                postLikeRepository.count(post.getId()));
     }
 }

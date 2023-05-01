@@ -1,0 +1,25 @@
+package com.tistory.jaimemin.application.usecase;
+
+import com.tistory.jaimemin.domain.member.service.MemberReadService;
+import com.tistory.jaimemin.domain.post.service.PostLikeWriteService;
+import com.tistory.jaimemin.domain.post.service.PostReadService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CreatePostLikeUseCase {
+
+    private final PostReadService postReadService;
+
+    private final MemberReadService memberReadService;
+
+    private final PostLikeWriteService postLikeWriteService;
+
+    public void execute(Long postId, Long memberId) {
+        var post = postReadService.getPost(postId);
+        var member = memberReadService.getMember(memberId);
+
+        postLikeWriteService.create(post, member);
+    }
+}
