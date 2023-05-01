@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class PostRepository {
             .memberId(resultSet.getLong("memberId"))
             .contents(resultSet.getString("contents"))
             .createdDate(resultSet.getObject("createdDate", LocalDate.class))
+            .likeCount(resultSet.getLong("likeCount"))
             .createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
             .build();
 
@@ -54,6 +56,21 @@ public class PostRepository {
         var params = new BeanPropertySqlParameterSource(request);
 
         return namedParameterJdbcTemplate.query(sql, params, DAILY_POST_COUNT_MAPPER);
+    }
+
+    public Optional<Post> findById(Long id, Boolean requiredLock) {
+        var sql = String.format("""
+                SELECT * FROM %s WHERE id = :id
+                """, TABLE);
+
+        if (requiredLock) {
+            sql += " FOR UPDATE";
+        }
+
+        var params = new MapSqlParameterSource().addValue("id", id);
+        var nullablePost = namedParameterJdbcTemplate.queryForObject(sql, params, ROW_MAPPER);
+
+        return Optional.ofNullable(nullablePost);
     }
 
     public Page<Post> findAllByMemberId(Long memberId, Pageable pageable) {
@@ -172,7 +189,7 @@ public class PostRepository {
             return insert(post);
         }
 
-        throw new UnsupportedOperationException("Post는 갱신을 지원하지 않습니다.");
+        return update(post);
     }
 
     public void bulkInsert(List<Post> posts) {
@@ -201,6 +218,22 @@ public class PostRepository {
                 .createdDate(post.getCreatedDate())
                 .createdAt(post.getCreatedAt())
                 .build();
+    }
+
+    private Post update(Post post) {
+        var sql = String.format("""
+                UPDATE %s 
+                SET memberId = :memberId, 
+                contents = :contents, 
+                createdDate = :createdDate, 
+                likeCount = :likeCount, 
+                createdAt = :createdAt 
+                WHERE id = :id
+                """, TABLE);
+        SqlParameterSource params = new BeanPropertySqlParameterSource(post);
+        namedParameterJdbcTemplate.update(sql, params);
+
+        return post;
     }
 
     private Long getCount(Long memberId) {
